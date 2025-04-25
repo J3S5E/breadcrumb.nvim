@@ -26,8 +26,10 @@ local function get_filepath()
 	end
 	M.filename = cur_filename
 
+	local is_windows = vim.fn.has("win64") == 1 or vim.fn.has("win32") == 1 or vim.fn.has("win16") == 1
+	local folder_delim = is_windows and "\\" or "/"
 	local cwd = vim.fn.getcwd()
-	local project_dir = vim.split(cwd, "/")
+	local project_dir = vim.split(cwd, folder_delim)
 	local project_name = project_dir[#project_dir]
 	local root = vim.fn.expand("%:h")
 
@@ -40,7 +42,7 @@ local function get_filepath()
 	local value = " "
 
 	if not utils.isempty(root) and root ~= "." then
-		local root_parts = utils.split(root, "/")
+		local root_parts = utils.split(root, folder_delim)
 		for _, rp in ipairs(root_parts) do
 			local hl_separator = "%#" .. config.highlight_group.separator .. "#" .. config.separator .. "%*"
 			local hl_rp = "%#" .. config.highlight_group.component .. "#" .. rp .. "%*"
