@@ -526,9 +526,10 @@ function M.get_location(opts)
 	local ret = ""
 
 	if local_config.highlight then
+		local space = "%#" .. local_config.highlight_group.component .. "#" .. " " .. "%*"
 		ret = table.concat(
 			location,
-			" %#" .. local_config.highlight_group.separator .. "#" .. local_config.separator .. "%* "
+			space .. "%#" .. local_config.highlight_group.separator .. "#" .. local_config.separator .. "%*" .. space
 		)
 	else
 		ret = table.concat(location, local_config.separator)

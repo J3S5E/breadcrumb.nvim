@@ -6,6 +6,7 @@ local highlight = require("breadcrumb.highlight")
 local M = {}
 local isBreadcrumb_enabled = true
 local isInit = false
+local isHighlightAdded = false
 
 local default_config = {
 	disabled_filetype = {
@@ -164,6 +165,9 @@ function M.get_breadcrumb()
 	end
 	if excludes() then
 		return ""
+	end
+	if not isHighlightAdded and default_config.color_icons then
+		isHighlightAdded = highlight.add_highlight(default_config.highlight_group.component)
 	end
 	return renderer.create_breadcrumb()
 end

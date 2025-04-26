@@ -18,6 +18,14 @@ function M.setup(user_config)
 	config = vim.tbl_deep_extend("force", config, user_config)
 end
 
+local function space()
+	return "%#" .. config.highlight_group.component .. "#" .. " " .. "%*"
+end
+
+local function get_color(hl_group, attribute)
+	return vim.fn.synIDattr(vim.fn.synIDtrans(vim.fn.hlID(hl_group)), attribute)
+end
+
 -- @return string contain path to file
 local function get_filepath()
 	local cur_filename = vim.fn.expand("%:t")
@@ -39,34 +47,32 @@ local function get_filepath()
 		root = string.sub(root, i)
 	end
 	local extension = vim.fn.expand("%:e")
-	local value = " "
+	local value = space()
 
 	if not utils.isempty(root) and root ~= "." then
 		local root_parts = utils.split(root, folder_delim)
 		for _, rp in ipairs(root_parts) do
 			local hl_separator = "%#" .. config.highlight_group.separator .. "#" .. config.separator .. "%*"
 			local hl_rp = "%#" .. config.highlight_group.component .. "#" .. rp .. "%*"
-			value = value .. hl_rp .. " " .. hl_separator .. " "
+			value = value .. hl_rp .. space() .. hl_separator .. space()
 		end
 	end
 
 	if not utils.isempty(cur_filename) then
-		local file_icon, file_icon_color = require("nvim-web-devicons").get_icon_color(
-			cur_filename,
-			extension,
-			{ default = true }
-		)
+		local file_icon, file_icon_color =
+			require("nvim-web-devicons").get_icon_color(cur_filename, extension, { default = true })
+		local guibg = get_color(config.highlight_group.component, "bg#")
 
 		local hl_group = "FileIconColor" .. extension
 
-		vim.api.nvim_set_hl(0, hl_group, { fg = file_icon_color })
+		vim.api.nvim_set_hl(0, hl_group, { fg = file_icon_color, bg = guibg })
 		if utils.isempty(file_icon) then
 			file_icon = ""
 			file_icon_color = ""
 		end
 		local hl_icon = "%#" .. hl_group .. "#" .. file_icon .. "%*"
 		local hl_filename = "%#" .. config.highlight_group.component .. "#" .. cur_filename .. "%*"
-		value = value .. hl_icon .. " " .. hl_filename
+		value = value .. hl_icon .. space() .. hl_filename
 		M.filename_output = value
 	end
 	return value
@@ -91,7 +97,7 @@ local function get_navic()
 		return ""
 	else
 		local hl_separator = "%#" .. config.highlight_group.separator .. "#" .. config.separator .. "%*"
-		return hl_separator .. " " .. navic_location
+		return hl_separator .. space() .. navic_location
 	end
 end
 
@@ -102,7 +108,7 @@ function M.create_breadcrumb()
 	local navic_added = false
 	if not utils.isempty(breadcrumb_output) then
 		local navic_value = get_navic()
-		breadcrumb_output = breadcrumb_output .. " " .. navic_value
+		breadcrumb_output = breadcrumb_output .. space() .. navic_value
 		if not utils.isempty(navic_value) then
 			navic_added = true
 		end
@@ -111,7 +117,7 @@ function M.create_breadcrumb()
 	if not utils.isempty(breadcrumb_output) and utils.get_buf_option("mod") then
 		local mod = "%#" .. config.highlight_group.component .. "#" .. "●" .. "%*"
 		if navic_added then
-			breadcrumb_output = breadcrumb_output .. " " .. mod
+			breadcrumb_output = breadcrumb_output .. space() .. mod
 		else
 			breadcrumb_output = breadcrumb_output .. mod
 		end
@@ -120,7 +126,7 @@ function M.create_breadcrumb()
 end
 
 function M.get_filepath()
-  return get_filepath()
+	return get_filepath()
 end
 
 return M
